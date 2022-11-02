@@ -90,39 +90,48 @@
         $("#contenido").html("");
         $("#contenido").load("crearPersonaje.html");
 
-        var request = '/api/series';
+        var request = 'api/series';
         $.ajax({
             "url": url + request
             , "type": "GET"
-            , success: function () {
+            , success: function (data) {
                 var html = "";
                 $.each(data, function(index, serie){
+                    console.log(serie);
                     html += "<option value='" + serie.idSerie + "'>";
                     html += serie.nombre + "</option>";
                 });
-                $(".eldiv #selectSeries").html(html);  
+                $(".eldiv #selectSerie").html(html);  
                               
             }, "error": function (error) {
                 console.log("Error servicio INSERTAR");
             }
         });
+    }
 
-        // var request = '/api/Personajes';
-        // $.ajax({
-        //     "url": url + request
-        //     , "type": "POST"
-        //     , "data": dataJson
-        //     , "contentType": "application/json"
-        //     , success: function () {
-        //         console.log("Insertado");
-        //         $(".eldiv .inputPer").text(data.nombre);
-        //         $(".eldiv .inputImg").html("").attr("src", data.imagen);
-        //         $(".eldiv #selectSeries")
-        //     }, "error": function (error) {
-        //         console.log("Error servicio INSERTAR");
-        //     }
-        // });
+    function enviarFormCrear(){
+        event.preventDefault();
 
+        var personaje = new Object();
+        personaje.nombre = $(".inputPer").val();
+        personaje.imagen = $(".inputImg").val();
+        personaje.idSerie = parseInt($("#selectSerie").val());
+        personaje.idPersonaje = 0;
+
+        var request = 'api/Personajes';
+
+
+        $.ajax({
+            "url":url+request,
+            "method":"POST",
+            "contentType": "application/json",
+            //convertimos el objeto en JSON STRINGIFY
+            "data": JSON.stringify(personaje),
+            success:function(data){
+                window.location.href = "javascript:mostrarPersonajes('"+personaje.idSerie+"')";
+            }
+
+        })
     }
 
     function modificarPersonaje() {
@@ -130,16 +139,58 @@
         $("#contenido").html("");
         $("#contenido").load("modificarPersonaje.html");
 
-        var request = '/api/Personajes';
+        var request = 'api/series';
         $.ajax({
             "url": url + request
-            , "type": "PUT"
-            , "data": dataJson
-            , "contentType": "application/json"
+            , "type": "GET"
             , success: function (data) {
-                console.log("Insertado");
+                var html = "";
+                $.each(data, function(index, serie){
+                    console.log(serie);
+                    html += "<option value='" + serie.idSerie + "'>";
+                    html += serie.nombre + "</option>";
+                });
+                $(".selectSer").html(html);  
+                              
+            }, "error": function (error) {
+                console.log("Error servicio INSERTAR");
             }
+        });
+
+        var request1 = 'api/Personajes';
+        $.ajax({
+            "url": url + request1
+            , "type": "GET"
+            , success: function (data) {
+                var html = "";
+                $.each(data, function(index, personaje){
+                    html += "<option value='" + personaje.idPersonaje+ "'>";
+                    html += personaje.nombre + "</option>";
+                });
+                $(".selectPer").html(html);  
+                              
+            }, "error": function (error) {
+                console.log("Error servicio INSERTAR");
+            }
+        });
+    }
+
+    function enviarModificado(){
+        event.preventDefault();
+
+        var idSerie = $(".selectSer").val();
+        var idPersonaje = $(".selectPer").val();
+
+        var request = 'api/Personajes/'+idPersonaje+'/'+idSerie;
+        $.ajax({
+            "url":url+request,
+            "method":"PUT",
+            success:function(data){
+                window.location.href = "javascript:mostrarPersonajes('"+idSerie+"')";
+            }
+
         })
+
     }
 
     $(document).ready(function () {
