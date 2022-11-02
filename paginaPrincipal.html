@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document</title>
+<!-- CUIDADO AL IMPORTAR EL JS QUE SEA EL bundle -->
+<script src="js/jquery-3.6.1.min.js"></script>
+<script src="bootstrap-5.2.2-dist/js/bootstrap.bundle.js"></script>
+<script src="bootstrap-5.2.2-dist/css/bootstrap.min.css"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+
+<script>
+
+    //variable de la url
+    var url = "https://apiseriespersonajes2023.azurewebsites.net/";
+
+    function cargarSeries() {
+
+        var request = 'api/Series';
+        $.ajax({
+            "url": url + request
+            , "method": "GET"
+            , "dataType": "json"
+            , success: function (data) {
+                console.log(data);
+                $.each(data, function (index, serie) {
+                    console.log(serie);
+                    var lista = $(".dropdown-menu");
+                    var options = $("<li>");
+                    var enlace = $("<a>", { "href": "javascript:detallesSerie('" + serie.idSerie + "')", "text": serie.nombre, "class": "dropdown-item" })
+                    $(options).append(enlace);
+                    $(lista).append(options);
+                })
+            }
+        })
+    }
+
+    function detallesSerie(idserie) {
+
+        $("#contenido").html("");
+        $("#contenido").load("detallesSerie.html");
+
+        var request = 'api/Series/' + idserie;
+        $.ajax({
+            "url": url + request
+            , "method": "GET"
+            , "dataType": "json"
+            , success: function (data) {
+                $(".tarjetaSerie .titulo").text(data.nombre);
+                $(".tarjetaSerie .imagen").html("").attr("src", data.imagen);
+                $(".tarjetaSerie .detalles").text(data.puntuacion);
+                $(".tarjetaSerie .btn").text("Mostrar personajes").attr("href", "javascript:mostrarPersonajes('" + idserie + "')");
+            }
+        })
+    }
+
+    function mostrarPersonajes(idserie) {
+        $("#contenido").html("");
+        $("#contenido").load("mostrarPersonajes.html");
+
+        var request = 'api/Series/PersonajesSerie/' + idserie;
+        $.ajax({
+            "url": url + request
+            , "method": "GET"
+            , "dataType": "json"
+            , success: function (data) {
+                $.each(data, function (index, personaje) {
+                    var tabla = $(".table tbody");
+                    var fila = $("<tr>");
+                    var celdaNom = $("<td>", { "text": personaje.nombre });
+                    var celdaImg = $("<td>");
+                    var img = $("<img>", { "src": personaje.imagen, "width": "100px", "height": "100px" });
+                    var celdaDet = $("<td>");
+                    var btn = $("<a>", { "href": "javascript:detallesSerie('" + idserie + "')", "class": "btn btn-danger", "text": "Volver" });
+
+                    $(tabla).append(fila);
+                    $(fila).append(celdaNom, celdaImg, celdaDet);
+                    $(celdaImg).append(img);
+                    $(celdaDet).append(btn);
+                })
+            }
+        })
+    }
+
+    function crearPersonaje(idserie) {
+
+        $("#contenido").html("");
+        $("#contenido").load("crearPersonaje.html");
+
+        var request = '/api/series';
+        $.ajax({
+            "url": url + request
+            , "type": "GET"
+            , success: function () {
+                var html = "";
+                $.each(data, function(index, serie){
+                    html += "<option value='" + serie.idSerie + "'>";
+                    html += serie.nombre + "</option>";
+                });
+                $(".eldiv #selectSeries").html(html);  
+                              
+            }, "error": function (error) {
+                console.log("Error servicio INSERTAR");
+            }
+        });
+
+        // var request = '/api/Personajes';
+        // $.ajax({
+        //     "url": url + request
+        //     , "type": "POST"
+        //     , "data": dataJson
+        //     , "contentType": "application/json"
+        //     , success: function () {
+        //         console.log("Insertado");
+        //         $(".eldiv .inputPer").text(data.nombre);
+        //         $(".eldiv .inputImg").html("").attr("src", data.imagen);
+        //         $(".eldiv #selectSeries")
+        //     }, "error": function (error) {
+        //         console.log("Error servicio INSERTAR");
+        //     }
+        // });
+
+    }
+
+    function modificarPersonaje() {
+
+        $("#contenido").html("");
+        $("#contenido").load("modificarPersonaje.html");
+
+        var request = '/api/Personajes';
+        $.ajax({
+            "url": url + request
+            , "type": "PUT"
+            , "data": dataJson
+            , "contentType": "application/json"
+            , success: function (data) {
+                console.log("Insertado");
+            }
+        })
+    }
+
+    $(document).ready(function () {
+        $("#menu").load("menu.html");
+        cargarSeries();
+    })
+
+</script>
+
+
+</head>
+
+<body>
+
+    <div id="menu"></div>
+    <div id="contenido"><img src="./images/imagen1.png" width="900px" height="600px" class="rounded mx-auto d-block" />
+    </div>
+
+</body>
+
+</html>
